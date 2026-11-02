@@ -2,6 +2,9 @@
 
 ## 1. 验收要求
 
+> 要求来源说明：3 m、50 cm、原地掉头、返回起点、总路程/平均速度来自课程中期检查布置，
+> **不在提供的传感器/电机 PDF 固定章节中**。电机手册 p92 只列五道运动思考题，不等于中期要求。
+
 1. 沿直线前进 3 m，不能明显走偏；
 2. 前方 50 cm 内检测到障碍物时停车，不能碰撞；
 3. 障碍物撤离后继续；
@@ -22,7 +25,7 @@
 
 ## 3. 实验实现思路
 
-`firmware/experimental/c50c-midterm/` 的状态机：
+`course/2026-midterm` 分支的 `firmware/experimental/c50c-midterm/` 状态机：
 
 ```text
 WAIT → OUT → (PAUSE) → TURN → BACK → DONE
