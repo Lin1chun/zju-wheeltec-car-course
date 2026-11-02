@@ -19,6 +19,8 @@
 4. **协议两端同步**：修改 C10B/C50C 串口帧时，必须同时更新两端结构体、BCC、长度、文档 `docs/07-serial-protocol.md` 和状态页。
 5. **不要用 CubeMX 重新生成 C10B 工程**：TIM1 舵机、超声扫描、字库等为手工集成，重新生成会覆盖。
 6. **不要提交构建产物、安装包、视频或厂商大文件**：见 `.gitignore`，二进制通过 Releases 发布。
+7. **课程进度以 `docs/00-lesson-map.md` 为准**：第一讲/第二讲/第三讲分别对应第 1/4/6 次课；第 2–3 次课组装，第 5 次课电机实训，第 7 次课综合任务。不要按技术难度重排课程。
+8. **区分 PDF 原文与课程布置**：16×16、距离示例、3 m 中期要求等并非原 PDF 逐字内容；文档必须标注来源，不能把课程布置写成课件原文。
 
 ## 3. 仓库地图
 
@@ -27,6 +29,9 @@ firmware/original/c10b      原始 C10B 参考工程
 firmware/original/c50c      原始 C50C 多车型工程
 firmware/experimental/      main 上的实验入口（完整代码见 course/2026-midterm）
 docs/                       课程步骤、接线、协议、排错、换硬件
+docs/00-lesson-map.md        七次课进度与 PDF 页码对照（权威）
+docs/11-motor-control-lab.md 第五次课电机控制实训
+docs/12-lesson7-integration.md 第七次课三项任务
 docs/reference/             课程原始 PDF/JPG/DOCX（内部使用）
 references/servo-example/   原始 PA8/TIM1 舵机例程关键源码
 scripts/                    构建/检查辅助脚本
