@@ -25,6 +25,8 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 | 7 | 综合实验：汉字距离 + 单超声扫描 + 姿态上报 | [第七次课综合任务](docs/12-lesson7-integration.md) |
 | 中期 | 3 m 直线、避障暂停、掉头、返回 | [中期检查](docs/06-midterm-3m-round-trip.md) |
 
+往届学生经验（主观，含吐槽与团队建议）：[往届经验与总结](docs/13-student-experience.md)。
+
 核心任务原文：
 
 - 第一讲 p56 课后任务：只使用一个超声波的情况下如何实现更大范围的避障？
@@ -81,6 +83,7 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 │   ├── 10-maintenance-and-roadmap.md
 │   ├── 11-motor-control-lab.md   # 第五次课
 │   ├── 12-lesson7-integration.md # 第七次课三项任务
+│   ├── 13-student-experience.md  # 往届经验（主观）
 │   └── reference/                # 课程原始 PDF/JPG/DOCX（内部使用）
 ├── firmware/
 │   ├── original/
