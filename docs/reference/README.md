@@ -21,4 +21,13 @@
 - `USB一键下载.txt`
 - `STlink下载程序.docx`
 
+## mpu
+
+- `MPU-6050寄存器映射.pdf`
+- `MPU6050.PDF`
+
+## K210
+
+- `references/k210/linefollow_k210-串口注释版.py`
+
 > 这些资料仅供本项目组课程学习使用，版权与使用限制见上级目录 `NOTICE.md`。
