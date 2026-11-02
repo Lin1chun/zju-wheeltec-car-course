@@ -99,6 +99,7 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 
 建议顺序：
 
+0. [完成检查清单](docs/CHECKLIST.md)
 1. [课程总览](docs/00-course-overview.md)
 2. [硬件与接线](docs/01-hardware-and-wiring.md)
 3. [工具链与烧录](docs/02-toolchain-and-flashing.md)
