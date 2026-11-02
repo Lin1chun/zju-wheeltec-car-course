@@ -10,8 +10,8 @@
 | `C:\Users\<用户>\AppData\Local\Keil_v5` | 约 3.2 GB | Keil MDK 5.41、ARMCC、UV4 | 不需要 Keil 时用自带 `Uninstall.exe` 卸载 |
 | `C:\Users\<用户>\AppData\Local\Arm\Packs` | 约 2.4 GB | Keil Pack 仓库（STM32F1/F4 等） | 只装过本课程可清理；其他 Keil 项目共用时保留 |
 | `C:\Users\<用户>\AppData\Local\Temp\course_pdfs` | 几十 MB | 本次 PDF 文本提取临时文件 | 可直接删除 |
-| `E:\...\car\work\tools` | 约 2 GB | GCC/ARMCC 校验工具、压缩包 | 仅本次源码校验使用，可删除 |
-| `E:\...\car\work\*\OBJ` | 几十 MB | Keil 编译产物 | 可删除，重新编译生成 |
+| 旧 `work/tools`（已清理） | 约 2 GB | GCC/ARMCC 校验工具、压缩包 | 已移到待删除/已清理 |
+| `E:\...\car\04_experiment_projects\**\OBJ` | 几十 MB | Keil 编译产物 | 可删除，重新编译生成 |
 | `E:\...\car\usb_drivers`（如保留） | 几 MB | CH9102/CH343/ST-LINK 驱动 | 驱动装好后可保留压缩包作备份 |
 | `Desktop\Keil uVision5.LNK` | 几 KB | Keil 快捷方式 | 卸载 Keil 时一并删除 |
 | 注册表 `HKLM\SOFTWARE\WOW6432Node\Keil` | — | Keil 安装信息 | 用 Keil 卸载器处理，不要手工乱删 |
@@ -72,15 +72,15 @@ pnputil /delete-driver oemXX.inf /uninstall
 
 ### 建议保留
 
-- `01_原始资料/`：课程 PDF、PPT、接线图、安装手册；
-- `05_课程仓库/`：Git 仓库（含 `.git`）；
-- `03_原始工程/`：原始 C10B/C50C；
-- `04_实验工程/`：需要继续调试的工程。
+- `01_reference_materials/`：课程 PDF、PPT、接线图、安装手册；
+- `05_course_repo/`：Git 仓库（含 `.git`）；
+- `03_reference_projects/`：舵机参考工程；原始 C10B/C50C 在仓库 `firmware/original/`；
+- `04_experiment_projects/`：需要继续调试的工程。
 
 ### 可删除
 
-- `work/tools/`：GCC/ARMCC 校验工具；
-- `work/` 下的 `OBJ`、`.uvguix`、`.uvoptx`、`*.hex`、`*.bin`、`*.axf`；
+- 旧 `work/tools/`：GCC/ARMCC 校验工具（已清理）；
+- `04_experiment_projects/**` 下的 `OBJ`、`.uvguix`、`.uvoptx`、`*.hex`、`*.bin`、`*.axf`；
 - `Temp/course_pdfs`；
 - 重复解压的原始工程（仓库已有）；
 - 不再需要的安装包/视频（确认有备份或 FTP 可重新下载）。
