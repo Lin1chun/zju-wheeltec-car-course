@@ -1,0 +1,19 @@
+* text=auto
+
+*.c text
+*.h text
+*.s text
+*.md text
+*.txt text
+*.uvprojx text
+*.ioc text
+*.py text
+*.ps1 text
+*.bat text
+
+*.pdf binary
+*.jpg binary
+*.png binary
+*.docx binary
+*.zip binary
+*.rar binary
