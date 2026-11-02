@@ -46,6 +46,17 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 
 完整接口和接线见 [硬件与接线](docs/01-hardware-and-wiring.md)。
 
+## 3.1 原始资料权威来源
+
+课程资料由老师通过 FTP 发布：
+
+- 主机：`10.13.12.198`
+- 端口：`3301`
+- 用户名：`zdhsx1`
+- 密码：按老师通知/课程群获取，**不写入 Git**
+
+连接方法、FileZilla 设置和排错见 [课程 FTP 资料源](docs/reference/ftp.md)。本地 `E:\ZJU_Documents\Course\car` 是镜像；若与 FTP 不一致，以 FTP 为准。
+
 ## 4. 仓库结构
 
 ```text

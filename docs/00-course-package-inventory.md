@@ -1,5 +1,8 @@
 # 课程原始资料清单与仓库取舍
 
+> 权威来源：课程 FTP `10.13.12.198:3301`，用户名 `zdhsx1`，密码按老师通知获取（不写入仓库）。
+> 连接与排错见 `docs/reference/ftp.md`；本地 `E:\ZJU_Documents\Course\car` 为镜像。
+
 本文记录 `E:\ZJU_Documents\Course\car` 原始课程包的目录构成，以及哪些内容进入了 Git 仓库、哪些保留在本地课程包。
 
 ## 1. 原始顶层目录

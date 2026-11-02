@@ -49,3 +49,7 @@ keil mdk*/
 *.bak
 *.tmp
 *.log
+
+# Local FTP credentials (never commit)
+docs/reference/ftp.local.*
+*credentials*
