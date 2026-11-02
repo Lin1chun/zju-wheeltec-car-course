@@ -45,6 +45,7 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 ├── NOTICE.md                     # 课程资料与第三方代码声明
 ├── docs/
 │   ├── 00-course-overview.md     # 课程总览与学习路径
+│   ├── 00-course-package-inventory.md # 原始资料清单与取舍
 │   ├── 01-hardware-and-wiring.md
 │   ├── 02-toolchain-and-flashing.md
 │   ├── 03-lab-oled-distance.md
@@ -179,6 +180,7 @@ C50C 原始工程通过 Keil Target 选择底盘类型，通过板上电位器�
 
 ## 11. 原始资料索引
 
+- 完整资料清单与取舍：[课程原始资料清单](docs/00-course-package-inventory.md)
 - 传感器完整讲义：`docs/reference/sensors/传感器与串口通讯-完整版.pdf`
 - 传感器 PPT：`docs/reference/sensors/传感器大课ppt.pdf`
 - 机械安装与下载手册：`docs/reference/hardware/03 麦轮小车机械安装与下载程序手册20260918.pdf`
