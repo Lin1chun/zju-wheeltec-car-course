@@ -293,6 +293,8 @@ static void OLED_ShowTask(void)
 	OLED_ShowNumber(30,15,c10b_rx_bytes,7,12);
 	OLED_ShowString(0,30,"HEAD");
 	OLED_ShowNumber(42,30,c10b_head_ok,6,12);
+		OLED_ShowString(82,30,"LEN");
+		OLED_ShowNumber(112,30,sizeof(C10B_Recvmsg),2,12);
 	OLED_ShowString(0,45,"OK");
 	OLED_ShowNumber(30,45,c10b_frame_ok,6,12);
 	OLED_ShowString(66,45,"BAD");
