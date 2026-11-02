@@ -173,8 +173,8 @@ scripts/                    构建/检查辅助脚本
 | `C:\Users\70336\AppData\Local\Keil_v5` | Keil MDK 5.41（约 3.2 GB） | 运行 `Uninstall.exe` |
 | `C:\Users\70336\AppData\Local\Arm\Packs` | Keil Pack（约 2.4 GB） | 确认无其他 Keil 项目后再删 |
 | `C:\Users\70336\AppData\Local\Temp\course_pdfs` | PDF 文本提取临时文件 | 可直接删除 |
-| `E:\...\car\work\tools` | GCC/ARMCC 校验工具（约 2 GB） | 可删除 |
-| `E:\...\car\work\*\OBJ` | Keil 构建产物 | 可删除 |
+| 旧 `work/tools`（已清理） | GCC/ARMCC 校验工具（约 2 GB） | 已清理 |
+| `E:\...\car\04_experiment_projects\**\OBJ` | Keil 构建产物 | 可删除 |
 | 设备管理器 `CH343` / `STM32 STLink` | USB 串口/下载器驱动 | 右键卸载设备，必要时删驱动 |
 | 注册表 `HKLM\SOFTWARE\WOW6432Node\Keil` | Keil 安装信息 | 用卸载器处理 |
 
