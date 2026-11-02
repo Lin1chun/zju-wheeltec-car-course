@@ -206,6 +206,8 @@ C50C 原始工程通过 Keil Target 选择底盘类型，通过板上电位器�
 - 仅通过 GitHub Releases 发布 `.hex`，不把构建产物提交到 Git；
 - 具体流程见 [维护与路线图](docs/10-maintenance-and-roadmap.md)。
 
+课程相关软件/驱动/Keil Pack 的安装位置与卸载方式见 [电脑清理指引](docs/14-pc-cleanup.md)。清理时不要删除原始资料和仓库 `.git`。
+
 ## 11. 版权与使用范围
 
 仓库包含 WHEELTEC 课程原始工程与课程 PDF，仅供本项目组课程学习使用。原始资料版权归 WHEELTEC / 浙江大学课程组所有；未经授权不得公开转载或用于商业用途。详见 [NOTICE.md](NOTICE.md)。
