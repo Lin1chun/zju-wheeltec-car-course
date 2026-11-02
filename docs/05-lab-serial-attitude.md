@@ -96,6 +96,24 @@ USB-TTL GND → C10B GND
 
 `course/2026-midterm` 分支实验工程的姿态显示与计数页未完成实车验收；当前现场仍出现 P/R/Y 恒为 0，需要继续检查 MPU6050 I2C/INT/DMP。
 
+### 重要代码坑：C50C 的 USART2 初始化
+
+原始 C50C `USER/system.c` 中：
+
+```c
+/*
+USART2_Init(115200);
+*/
+```
+
+这行默认被注释。USART2 的 GPIO、时钟、NVIC 和 RXNE 中断都不会初始化，`USART2_IRQHandler` 写得再对也不会触发，表现为：
+
+- C50C 第 4 页 `RX=0`；
+- C50C 收不到 C10B 的距离/姿态；
+- 页 2 `NOLNK` 一直存在。
+
+实验分支必须取消注释/调用 `USART2_Init(115200);`。修复后仍需 Rebuild 并现场验证。
+
 ## 9. 第二讲与实验四要点
 
 ### 第二讲（PPT p57–114）

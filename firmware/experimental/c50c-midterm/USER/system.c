@@ -215,11 +215,8 @@ void systemInit(void)
 		FlashParam_Read(); 
 		*/
 	
-		/*
-		//串口2初始化
-		//C10B C50C 通信
+				// C10B <-> C50C link (USART2, 115200-8N1)
 		USART2_Init(115200);
-		*/
 	
 		/*
 	//阿克曼车型对舵机初始化
