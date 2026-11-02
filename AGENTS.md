@@ -162,3 +162,22 @@ scripts/                    构建/检查辅助脚本
 - 硬件手册：`docs/reference/hardware/`
 - 舵机参考：`references/servo-example/`
 - 维护流程：`docs/10-maintenance-and-roadmap.md`
+
+## 15. 本课程对电脑的安装位置与卸载
+
+课程会留下课程数据、Keil 安装、Keil Pack、USB 驱动、便携工具和编译产物。完整清理步骤见 `docs/14-pc-cleanup.md`；这里只列必须知道的位置：
+
+| 位置 | 内容 | 处理 |
+|---|---|---|
+| `E:\ZJU_Documents\Course\car` | 课程资料/工程/视频/安装包 | 按分层结构保留，删除临时/重复 |
+| `C:\Users\70336\AppData\Local\Keil_v5` | Keil MDK 5.41（约 3.2 GB） | 运行 `Uninstall.exe` |
+| `C:\Users\70336\AppData\Local\Arm\Packs` | Keil Pack（约 2.4 GB） | 确认无其他 Keil 项目后再删 |
+| `C:\Users\70336\AppData\Local\Temp\course_pdfs` | PDF 文本提取临时文件 | 可直接删除 |
+| `E:\...\car\work\tools` | GCC/ARMCC 校验工具（约 2 GB） | 可删除 |
+| `E:\...\car\work\*\OBJ` | Keil 构建产物 | 可删除 |
+| 设备管理器 `CH343` / `STM32 STLink` | USB 串口/下载器驱动 | 右键卸载设备，必要时删驱动 |
+| 注册表 `HKLM\SOFTWARE\WOW6432Node\Keil` | Keil 安装信息 | 用卸载器处理 |
+
+**不要删除**：`firmware/original/`、仓库 `.git`、原始课程 PDF/RAR、个人报告/数据、其他课程共用 Pack。
+
+清理前先读 `docs/14-pc-cleanup.md`；FTP 密码、许可证、个人数据不要写进仓库或清理脚本。
