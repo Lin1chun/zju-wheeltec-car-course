@@ -14,7 +14,7 @@
 ## 2. 最高优先级规则
 
 1. **原始优先**：`firmware/original/` 是权威基线。不要覆盖、重排或“顺手重构”该目录。
-2. **实验代码必须标注状态**：`firmware/experimental/` 的代码未完成实车验收，文档不得写成“已验证”“可直接交付”。
+2. **实验代码必须标注状态**：完整实验代码在 `course/2026-midterm` 分支，未完成实车验收；`main` 的 `firmware/experimental/` 只是入口说明。
 3. **先验证再升级**：任何实验实现通过完整测试后，才能合并到 `main` 或标记为课程标准答案。
 4. **协议两端同步**：修改 C10B/C50C 串口帧时，必须同时更新两端结构体、BCC、长度、文档 `docs/07-serial-protocol.md` 和状态页。
 5. **不要用 CubeMX 重新生成 C10B 工程**：TIM1 舵机、超声扫描、字库等为手工集成，重新生成会覆盖。
@@ -25,7 +25,7 @@
 ```text
 firmware/original/c10b      原始 C10B 参考工程
 firmware/original/c50c      原始 C50C 多车型工程
-firmware/experimental/      课程扩展实现（未实车验收）
+firmware/experimental/      main 上的实验入口（完整代码见 course/2026-midterm）
 docs/                       课程步骤、接线、协议、排错、换硬件
 docs/reference/             课程原始 PDF/JPG/DOCX（内部使用）
 references/servo-example/   原始 PA8/TIM1 舵机例程关键源码

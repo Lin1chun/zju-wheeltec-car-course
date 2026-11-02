@@ -60,9 +60,7 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 │   ├── original/
 │   │   ├── c10b/                 # 原始 C10B 参考工程（权威基线）
 │   │   └── c50c/                 # 原始 C50C 工程（权威基线）
-│   └── experimental/
-│       ├── c10b-course/          # 课程扩展实现（未实车验收）
-│       └── c50c-midterm/         # 中期检查实现（未实车验收）
+│   └── experimental/             # main 上仅保留入口说明
 ├── references/
 │   └── servo-example/            # 原始舵机参考例程的关键源码
 └── scripts/                      # 构建/检查辅助脚本
@@ -117,15 +115,21 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 - C50C：原始多车型工程，支持 `Akm_Car`、`Diff_Car`、`Mec_Car`、`4WD_Car`、`Omni_Car`。
 - **不要直接修改该目录**；实验性改动放到 `firmware/experimental/` 或独立分支。
 
-### `firmware/experimental/`
+### `course/2026-midterm` 分支
 
-已尝试实现：
+完整的实验代码不在 `main`，而在 `course/2026-midterm` 分支：
 
 - C10B：16×16 汉字“距离/路程/均速”、舵机五扇区扫描、TIM7 独立 100 Hz 时基、23 字节上报帧；
 - C50C：23 字节协议解析、OLED 第 1/2/4 页、3 m 往返状态机、陀螺仪辅助 180° 掉头。
 
 当前状态：**仅做过源码级语法检查，未完成实车验收**。已知问题见
-[实验工程说明](firmware/experimental/README.md)。
+[实验分支说明](firmware/experimental/README.md)。
+
+切换：
+
+```powershell
+git switch course/2026-midterm
+```
 
 ## 6. 串口协议摘要
 
@@ -153,8 +157,8 @@ C50C 原始工程通过 Keil Target 选择底盘类型，通过板上电位器�
 | 项目 | 状态 |
 |---|---|
 | 原始工程 | 课程包基线，未在本仓库内重新编译 |
-| 实验 C10B | GCC 语法检查通过；未实车验收 |
-| 实验 C50C | GCC 语法检查通过；未实车验收 |
+| 实验 C10B（分支） | GCC 语法检查通过；未实车验收 |
+| 实验 C50C（分支） | GCC 语法检查通过；未实车验收 |
 | C10B→C50C 通信 | 未闭环，需现场继续排查接线/协议 |
 | MPU6050 姿态 | 现场出现 P/R/Y 恒为 0，原因待定位 |
 | 3 m 中期任务 | 逻辑已实现，未完成实车验收 |

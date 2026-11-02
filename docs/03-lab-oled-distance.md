@@ -72,4 +72,4 @@ page1: col0..col15  （下半 8 行）
 
 ## 7. 实验实现状态
 
-`firmware/experimental/c10b-course/` 中有 16×16 字模和显示实现，但**未完成实车验收**；请以原始工程 + 本步骤自行实现/验证。
+`course/2026-midterm` 分支的 `firmware/experimental/c10b-course/` 中有 16×16 字模和显示实现，但**未完成实车验收**；请以原始工程 + 本步骤自行实现/验证。

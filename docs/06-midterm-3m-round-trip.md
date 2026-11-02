@@ -22,7 +22,7 @@
 
 ## 3. 实验实现思路
 
-`firmware/experimental/c50c-midterm/` 的状态机：
+`course/2026-midterm` 分支的 `firmware/experimental/c50c-midterm/` 状态机：
 
 ```text
 WAIT → OUT → (PAUSE) → TURN → BACK → DONE

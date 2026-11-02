@@ -68,4 +68,4 @@ HC-SR04 的波束约 15°，固定朝前时：
 
 ## 8. 实验实现状态
 
-`firmware/experimental/c10b-course/` 实现了五扇区扫描和 TIM7 独立时基，但尚未完成实车验收；请以原始舵机例程为起点验证 PA8/TIM1。
+`course/2026-midterm` 分支的 `firmware/experimental/c10b-course/` 实现了五扇区扫描和 TIM7 独立时基，但尚未完成实车验收；请以原始舵机例程为起点验证 PA8/TIM1。
