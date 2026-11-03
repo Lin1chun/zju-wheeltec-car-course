@@ -36,6 +36,8 @@ C50C 有两层“车型”：
 | 7/8 | FLAGSHIP_MEC_BS | 152 mm | MD60N_18/47 |
 | 9/10 | FLAGSHIP_MEC_DL | 152 mm | MD60N_18/47 |
 
+> **新板实际经验**：新 C50C 默认 `TYPE=6`，本课程使用 `TYPE=1`。台架调试时必须先调到 1，否则会出现轻微触碰后轮子狂转、方向/速度异常。完整首轮清单见 [新板首轮检查](15-new-board-checklist.md)。
+
 ## 4. 麦轮的特殊注意
 
 原始 `mec_robot_init.c` 的 `switch(TypeNum)` 被注释，实际固定：
