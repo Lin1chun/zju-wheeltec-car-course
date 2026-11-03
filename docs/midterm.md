@@ -25,7 +25,7 @@
 
 ## 3. 实验实现思路
 
-`course/2026-midterm` 分支的 `firmware/experimental/c50c-midterm/` 状态机：
+`firmware/experimental/c50c-midterm/` 使用以下状态机：
 
 ```text
 WAIT → OUT → (PAUSE) → TURN → BACK → DONE
@@ -101,5 +101,5 @@ WAIT → OUT → (PAUSE) → TURN → BACK → DONE
 - 3 m 终点完成原地掉头并返回起点；
 - 结束后 OLED 显示总路程和平均速度。
 
-本版本对应 `course/2026-midterm` 分支和 `midterm-2026` 标签。实验报告中的具体
+本版本对应 `midterm-2026` 标签。实验报告中的具体
 横向偏差、返回误差等量化值应以现场测量记录为准。

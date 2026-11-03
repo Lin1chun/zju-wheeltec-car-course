@@ -1,6 +1,6 @@
 # K210 巡线参考
 
-本目录保存课程包中的 `linefollow_k210-串口注释版.py`，用于参考 K210 巡线、串口帧和注释结构。
+本目录保存 `linefollow_k210-serial-annotated.py`，用于参考 K210 巡线与串口帧结构。
 
 注意：
 

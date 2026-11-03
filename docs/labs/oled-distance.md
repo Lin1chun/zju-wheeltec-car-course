@@ -21,7 +21,7 @@
 
 - 传感器讲义 OLED/字模章节；
 - `references/` 中的原始工程；
-- `docs/reference/sensors/传感器与串口通讯-完整版.pdf`。
+- `docs/reference/sensors/sensors-and-serial-communication-full.pdf`。
 
 课件原文依据：
 
@@ -88,4 +88,4 @@ page1: col0..col15  （下半 8 行）
 
 ## 7. 实验实现状态
 
-`course/2026-midterm` 分支的 `firmware/experimental/c10b-course/` 中有 16×16 字模和显示实现，但**未完成实车验收**；请以原始工程 + 本步骤自行实现/验证。
+`firmware/experimental/c10b-course/` 包含 16×16 字模和显示实现，已随 `midterm-2026` 完成实车验收。
