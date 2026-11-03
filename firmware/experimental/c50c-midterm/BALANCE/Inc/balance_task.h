@@ -173,7 +173,7 @@ static void K210_control(void);
 
 //=================================================================
 #ifndef MIDTERM_ENABLE
-#define MIDTERM_ENABLE 0   /* 0 = only show sensor/attitude pages, car stays still */
+#define MIDTERM_ENABLE 1   /* 0 = only show sensor/attitude pages, car stays still */
 #endif
 
 enum {

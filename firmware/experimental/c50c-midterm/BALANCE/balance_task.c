@@ -2357,7 +2357,7 @@ void ROBOT_CONTROL_t_Init(ROBOT_CONTROL_t* p)
 	p->FlagStop = 0;
 	
 	//纠偏系数
-	p->LineDiffParam = 50;
+	p->LineDiffParam = 52;
 }
 
 //自检变量初始化
@@ -2711,14 +2711,14 @@ static uint8_t Deep_SelfCheck( u16 RATE )
  *   BACK : drive forward 3.00 m back to the start line
  *   DONE : stop and latch total path / average speed
  * ===================================================================== */
-#define MID_SPEED             0.12f
+#define MID_SPEED             0.20f
 #define MID_TARGET_DIST       3.00f
 #define MID_DIST_TOL          0.02f
 #define MID_STOP_MM           500
 #define MID_CLEAR_MM          550
 #define MID_CLEAR_TICKS       40      /* 0.4 s clear before resuming */
 #define MID_TURN_TOL_DEG      1.0f
-#define MID_TURN_MAX          0.60f   /* rad/s */
+#define MID_TURN_MAX          0.50f   /* rad/s */
 #define MID_TURN_TIMEOUT_MS   15000
 #define MID_DEG2RAD           0.0174532925f
 #define MID_RAD2DEG           57.29578f
