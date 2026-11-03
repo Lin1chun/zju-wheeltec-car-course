@@ -36,6 +36,8 @@ C50C 有两层“车型”：
 | 7/8 | FLAGSHIP_MEC_BS | 152 mm | MD60N_18/47 |
 | 9/10 | FLAGSHIP_MEC_DL | 152 mm | MD60N_18/47 |
 
+> **新板实际经验**：新 C50C 默认 `TYPE=6`，本课程使用 `TYPE=1`。台架调试时必须先调到 1，否则会出现轻微触碰后轮子狂转、方向/速度异常。完整首轮清单见 [新板首轮检查](15-new-board-checklist.md)。
+
 ## 4. 麦轮的特殊注意
 
 原始 `mec_robot_init.c` 的 `switch(TypeNum)` 被注释，实际固定：
@@ -76,4 +78,4 @@ C10B 与底盘类型无关，继续负责超声/舵机/MPU/OLED/K210；换底盘
 
 ## 8. 实验代码提醒
 
-`firmware/experimental/c50c-midterm/` 针对当前麦轮代码和 23 字节协议编写；换到底盘类型后，运动学、里程计、掉头逻辑都需要重新验证。不要把实验代码直接套到新车型。
+`course/2026-midterm` 分支的 `firmware/experimental/c50c-midterm/` 针对当前麦轮代码和 23 字节协议编写；换到底盘类型后，运动学、里程计、掉头逻辑都需要重新验证。不要把实验代码直接套到新车型。

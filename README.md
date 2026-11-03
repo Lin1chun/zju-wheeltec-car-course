@@ -27,6 +27,8 @@ WHEELTEC C10B / C50C 双控制板小车的课程工程、实验指导、串口�
 | 7 | 综合实验：汉字距离 + 单超声扫描 + 姿态上报 | [第七次课综合任务](docs/12-lesson7-integration.md) |
 | 中期 | 3 m 直线、避障暂停、掉头、返回 | [中期检查](docs/06-midterm-3m-round-trip.md) |
 
+新板首轮上电、TYPE=1、电压 0.02 V、FlyMcu DTR/RTS 反相：[新板首轮检查](docs/15-new-board-checklist.md)。
+
 往届学生经验（主观，含吐槽与团队建议）：[往届经验与总结](docs/13-student-experience.md)。
 
 核心任务原文：
