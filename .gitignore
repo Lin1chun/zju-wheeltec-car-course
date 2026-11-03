@@ -1,0 +1,53 @@
+# Keil build outputs
+OBJ/
+Objects/
+Listings/
+MDK-ARM/C10B/
+*.o
+*.d
+*.axf
+*.hex
+*.bin
+*.map
+*.lnp
+*.dep
+*.crf
+*.iex
+*.lst
+*.htm
+*.build_log.htm
+*.sct
+*.log
+
+# Keil user and debugger files
+*.uvguix
+*.uvguix.*
+*.uvoptx
+*.scvd
+JLinkSettings.ini
+EventRecorderStub.scvd
+DebugConfig/
+.vscode/
+
+# OS and editor files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Local packages and media
+*.rar
+*.7z
+*.zip
+*.exe
+*.msi
+*.mp4
+*.avi
+*.iso
+Keil*/
+keil mdk*/
+
+# Local scratch and credentials
+*.bak
+*.tmp
+ftp.local.*
+*credentials*
