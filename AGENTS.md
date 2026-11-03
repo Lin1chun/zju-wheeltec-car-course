@@ -8,13 +8,13 @@
 
 - 原始课程工程（权威基线）；
 - 课程实验指导与接线/排错文档；
-- 未实车验收的实验实现；
+- 已完成实车验收的 2026 年中期实验实现；
 - 后续中期检查、期末项目扩展的维护规范。
 
 ## 2. 最高优先级规则
 
 1. **原始优先**：`firmware/original/` 是权威基线。不要覆盖、重排或“顺手重构”该目录。
-2. **实验代码必须标注状态**：完整实验代码在 `course/2026-midterm` 分支，未完成实车验收；`main` 的 `firmware/experimental/` 只是入口说明。
+2. **实验代码必须标注状态**：完整实验代码已合并到 `main`，`midterm-2026` 标签对应 2026 年中期检查实车验收版本；后续改动必须重新验证。
 3. **先验证再升级**：任何实验实现通过完整测试后，才能合并到 `main` 或标记为课程标准答案。
 4. **协议两端同步**：修改 C10B/C50C 串口帧时，必须同时更新两端结构体、BCC、长度、文档 `docs/07-serial-protocol.md` 和状态页。
 5. **不要用 CubeMX 重新生成 C10B 工程**：TIM1 舵机、超声扫描、字库等为手工集成，重新生成会覆盖。
@@ -29,7 +29,7 @@
 ```text
 firmware/original/c10b      原始 C10B 参考工程
 firmware/original/c50c      原始 C50C 多车型工程
-firmware/experimental/      main 上的实验入口（完整代码见 course/2026-midterm）
+firmware/experimental/      中期检查已验证的完整实验工程
 docs/                       课程步骤、接线、协议、排错、换硬件
 docs/00-lesson-map.md        七次课进度与 PDF 页码对照（权威）
 docs/11-motor-control-lab.md 第五次课电机控制实训
@@ -133,8 +133,8 @@ scripts/                    构建/检查辅助脚本
 
 ## 11. Git 工作流
 
-- `main`：原始基线 + 已验证文档；
-- `course/2026-midterm`：中期检查实验实现；
+- `main`：原始基线、已验证文档和 2026 年中期实验实现；
+- `course/2026-midterm`：保留中期检查实现的来源与追溯记录；
 - `course/2027-final`：后续期末项目；
 - 标签：`midterm-2026`、`final-2027`；
 - 提交信息：`lab2: fix servo scan timing`、`docs: update wiring table`；
@@ -150,11 +150,14 @@ scripts/                    构建/检查辅助脚本
 4. 如涉及车型，更新 `docs/09-car-type-and-new-hardware.md`；
 5. 如涉及验证状态，更新本文件测试矩阵/README 状态表。
 
-## 13. 已知未闭环问题
+## 13. 已验证基线
 
-- C10B → C50C 通信：需确认两端协议版本（12/23 字节）、PA3 接线、共地、RX 计数；
-- MPU6050 姿态：现场 P/R/Y 恒为 0，需检查 I2C/INT/DMP；
-- 实验代码未完成实车验收，不得标记为“已验证”。
+- `midterm-2026`：2026 年中期检查实车验收版本；
+- C10B → C50C 使用 23 字节协议，长度、BCC 和两端字段保持一致；
+- C10B 距离/扫描/姿态可发送至 C50C，并在 OLED 显示；
+- C50C 以 `0.20 m/s`、`LineDiffParam=52`、`MID_TURN_MAX=0.50` 完成中期任务。
+
+后续修改仍须重新完成 AGENTS.md 第 7 节测试矩阵，不得把新改动自动视为已验证。
 
 ## 14. 参考
 
