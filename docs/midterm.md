@@ -47,12 +47,14 @@ WAIT → OUT → (PAUSE) → TURN → BACK → DONE
 | `MID_SPEED` | 0.20 m/s | 现场验收巡航速度 |
 | `MID_TARGET_DIST` | 3.00 m | 单程 |
 | `MID_DIST_TOL` | 0.02 m | 停车容差 |
-| `MID_STOP_MM` | 500 mm | 障碍阈值 |
-| `MID_CLEAR_MM` | 550 mm | 恢复阈值 |
+| `MID_STOP_MM` | 600 mm | 障碍阈值，补偿扫描与制动延迟 |
+| `MID_CLEAR_MM` | 650 mm | 恢复阈值 |
 | `MID_CLEAR_TICKS` | 40（0.4 s） | 撤离确认 |
 | `MID_TURN_TOL_DEG` | 1° | 掉头容差 |
 | `MID_TURN_MAX` | 0.5 rad/s | 现场验收转向限速 |
-| `LineDiffParam` | 52 | 新板实车直线修正值 |
+| `LineDiffParam` | 53 | 候选修复直线修正值；`midterm-2026` 使用 52 |
+
+候选修复版本要求 C10B 连续发送 10 个有效帧后才允许起步。
 
 ## 5. 控制策略
 
@@ -103,3 +105,5 @@ WAIT → OUT → (PAUSE) → TURN → BACK → DONE
 
 本版本对应 `midterm-2026` 标签。实验报告中的具体
 横向偏差、返回误差等量化值应以现场测量记录为准。
+
+2026-11-09 的传感器与里程计修复仍待实车复验，复验通过前不替换 `midterm-2026` 标签。

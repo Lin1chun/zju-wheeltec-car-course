@@ -55,6 +55,13 @@ uint8_t k210_active_flag=0;
 C10B_Sendmsg c10b_send = { 0 };
 /* ================= servo-scanned ultrasonic ================= */
 #define SCAN_SECTORS 5
+#define RANGER_SCAN_TICKS 10u
+#define RANGER_TRIG_TICK_1 5u
+#define RANGER_TRIG_TICK_2 9u
+#define RANGER_STALE_TICKS 75u
+#define RANGER_STOP_MM 600u
+#define RANGER_CLEAR_MM 650u
+#define RANGER_NO_ECHO_MM 4000u
 static const uint16_t scan_pulse_us[SCAN_SECTORS] = {1000,1250,1500,1750,2000};
 static const int8_t   scan_angle_deg[SCAN_SECTORS] = {-60,-30,0,30,60};
 static uint8_t  scan_sec = 2;
@@ -64,14 +71,20 @@ static uint8_t  scan_ok[SCAN_SECTORS] = {0,0,0,0,0};
 static uint8_t  scan_age[SCAN_SECTORS] = {0,0,0,0,0};
 static volatile uint8_t echo_sec = 2;
 static volatile uint8_t ranger_cap_wait_down = 0;
+static volatile uint8_t ranger_sample_pending = 0;
 static uint8_t ranger_echo_timeout = 0;
-static uint16_t ranger_mm = 0;
 static uint16_t front_mm = 0;
 static uint16_t min_mm = 0;
 static uint8_t  obstacle_flag = 1;
 
 static void ranger_tri_ranging(void)
 {
+    ranger_cap_wait_down = 0;
+    ranger_sample_pending = 1;
+    ranger_echo_timeout = 0;
+    TIM_RESET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2);
+    TIM_SET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2,TIM_ICPOLARITY_RISING);
+
     HAL_GPIO_WritePin(ranger_tri_GPIO_Port, ranger_tri_Pin, GPIO_PIN_RESET);
     delay_us(2);
     HAL_GPIO_WritePin(ranger_tri_GPIO_Port, ranger_tri_Pin, GPIO_PIN_SET);
@@ -91,17 +104,18 @@ static void scan_update_summary(void)
     }
     min_mm = (amin==0xFFFF)?0:amin;
     front_mm = (fmin==0xFFFF)?0:fmin;
-    ranger_mm = scan_ok[2]?scan_dist_mm[2]:front_mm;
     if(fmin==0xFFFF) obstacle_flag=1;          /* no valid forward echo: fail safe */
-    else if(fmin<500) obstacle_flag=1;
-    else if(fmin>550) obstacle_flag=0;         /* 50 mm hysteresis */
+    else if(fmin<RANGER_STOP_MM) obstacle_flag=1;
+    else if(fmin>RANGER_CLEAR_MM) obstacle_flag=0;
 }
 
 static void scan_add_sample(uint16_t mm,uint8_t sec)
 {
     if(sec>=SCAN_SECTORS || mm<20 || mm>4000) return;
-    if(scan_ok[sec]) scan_dist_mm[sec]=(uint16_t)(((uint32_t)scan_dist_mm[sec]*3u+mm)/4u);
-    else scan_dist_mm[sec]=mm;
+    if(!scan_ok[sec] || mm < scan_dist_mm[sec] || mm >= RANGER_NO_ECHO_MM)
+        scan_dist_mm[sec]=mm;
+    else
+        scan_dist_mm[sec]=(uint16_t)(((uint32_t)scan_dist_mm[sec]*3u+mm)/4u);
     scan_ok[sec]=1;
     scan_age[sec]=0;
     scan_update_summary();
@@ -214,7 +228,7 @@ int main(void)
 	  	  /* 16x16 Chinese distance line: display 0.05 m as requested */
 	  OLED_ShowCN16(0,0,cnfont16[CN16_JULI]);
 	  OLED_ShowCN16(16,0,cnfont16[CN16_LI]);
-	  OLED_ShowFloat16(32,0,ranger_mm/1000.0f,1,2);
+	  OLED_ShowFloat16(32,0,front_mm/1000.0f,1,2);
 	  OLED_ShowCN16(80,0,cnfont16[CN16_MI]);
 
 	  /* Servo sector, forward-zone distance and obstacle decision */
@@ -365,35 +379,35 @@ static void C10B_Tick100Hz(void)
 	static uint8_t c50c_send_cnt = 0;
 	uint8_t i;
 
-	/* Servo sector scan: 5 sectors x 160 ms, two pings per sector. */
+	/* Servo sector scan: 5 sectors x 100 ms, two pings per sector. */
 	for(i=0;i<SCAN_SECTORS;i++)
 	{
 		if(scan_age[i]<255) scan_age[i]++;
-		if(scan_age[i]>150) scan_ok[i]=0;
+		if(scan_age[i]>RANGER_STALE_TICKS) scan_ok[i]=0;
 	}
 	scan_tick++;
-	if(scan_tick>=16)
+	if(scan_tick>=RANGER_SCAN_TICKS)
 	{
 		scan_tick=0;
 		scan_sec=(uint8_t)((scan_sec+1)%SCAN_SECTORS);
 		__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,scan_pulse_us[scan_sec]);
 	}
-	if(scan_tick==9 || scan_tick==15)
+	if(scan_tick==RANGER_TRIG_TICK_1 || scan_tick==RANGER_TRIG_TICK_2)
 	{
 		echo_sec=scan_sec;
 		ranger_tri_ranging();
-		ranger_echo_timeout=0;
 	}
-	else if(ranger_cap_wait_down)
+	else if(ranger_sample_pending)
 	{
 		ranger_echo_timeout++;
-		if(ranger_echo_timeout>4)          /* no falling edge: beyond 4 m range */
+		if(ranger_echo_timeout>4)
 		{
 			ranger_echo_timeout=0;
+			ranger_sample_pending=0;
 			ranger_cap_wait_down=0;
 			TIM_RESET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2);
 			TIM_SET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2,TIM_ICPOLARITY_RISING);
-			scan_add_sample(4000,echo_sec);
+			scan_add_sample(RANGER_NO_ECHO_MM,echo_sec);
 		}
 	}
 	scan_update_summary();
@@ -484,7 +498,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 				{
 					uint16_t mm=(uint16_t)(ranger_dis*1000.0f+0.5f);
 					scan_add_sample(mm,echo_sec);
-				}				
+				}
+				ranger_sample_pending=0;
 				//设置上升沿捕获
 				TIM_RESET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2);
 				TIM_SET_CAPTUREPOLARITY(&htim2,TIM_CHANNEL_2,TIM_ICPOLARITY_RISING);

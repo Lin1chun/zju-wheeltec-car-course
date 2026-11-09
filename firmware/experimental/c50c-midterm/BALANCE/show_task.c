@@ -220,12 +220,12 @@ static void OLED_ShowTask(void)
 
 	OLED_ShowCN16(0,16,cnfont16[CN16_LU]);
 	OLED_ShowCN16(16,16,cnfont16[CN16_CHENG]);
-	OLED_ShowFloat16(32,16,Midterm_Distance(),1,2);
+	OLED_ShowFloat16(32,16,Midterm_Distance(),1,3);
 	OLED_ShowChar(80,16,'m',16,1);
 
 	OLED_ShowCN16(0,32,cnfont16[CN16_JUN]);
 	OLED_ShowCN16(16,32,cnfont16[CN16_SU]);
-	OLED_ShowFloat16(32,32,Midterm_AvgSpeed(),1,2);
+	OLED_ShowFloat16(32,32,Midterm_AvgSpeed(),1,3);
 	OLED_ShowChar(80,32,'m',16,1);
 	OLED_ShowChar(88,32,'/',16,1);
 	OLED_ShowChar(96,32,'s',16,1);
