@@ -22,6 +22,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "obstacle_safety.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,13 +55,12 @@ uint8_t k210_active_flag=0;
 
 C10B_Sendmsg c10b_send = { 0 };
 /* ================= servo-scanned ultrasonic ================= */
-#define SCAN_SECTORS 5
+#define SCAN_SECTORS OBSTACLE_SECTOR_COUNT
 static const uint16_t scan_pulse_us[SCAN_SECTORS] = {1000,1250,1500,1750,2000};
 static const int8_t   scan_angle_deg[SCAN_SECTORS] = {-60,-30,0,30,60};
 static uint8_t  scan_sec = 2;
+static uint8_t  scan_slot = 0;
 static uint8_t  scan_tick = 0;
-static uint16_t scan_dist_mm[SCAN_SECTORS] = {0,0,0,0,0};
-static uint8_t  scan_ok[SCAN_SECTORS] = {0,0,0,0,0};
 static uint8_t  scan_age[SCAN_SECTORS] = {0,0,0,0,0};
 static volatile uint8_t echo_sec = 2;
 static volatile uint8_t ranger_cap_wait_down = 0;
@@ -69,6 +69,7 @@ static uint16_t ranger_mm = 0;
 static uint16_t front_mm = 0;
 static uint16_t min_mm = 0;
 static uint8_t  obstacle_flag = 1;
+static obstacle_guard_t obstacle_guard;
 
 static void ranger_tri_ranging(void)
 {
@@ -81,28 +82,21 @@ static void ranger_tri_ranging(void)
 
 static void scan_update_summary(void)
 {
-    uint8_t i;
-    uint16_t fmin=0xFFFF, amin=0xFFFF;
-    for(i=0;i<SCAN_SECTORS;i++)
-    {
-        if(!scan_ok[i]) continue;
-        if(scan_dist_mm[i] && scan_dist_mm[i]<amin) amin=scan_dist_mm[i];
-        if(i>=1 && i<=3 && scan_dist_mm[i] && scan_dist_mm[i]<fmin) fmin=scan_dist_mm[i];
-    }
-    min_mm = (amin==0xFFFF)?0:amin;
-    front_mm = (fmin==0xFFFF)?0:fmin;
-    ranger_mm = scan_ok[2]?scan_dist_mm[2]:front_mm;
-    if(fmin==0xFFFF) obstacle_flag=1;          /* no valid forward echo: fail safe */
-    else if(fmin<500) obstacle_flag=1;
-    else if(fmin>550) obstacle_flag=0;         /* 50 mm hysteresis */
+    front_mm = (obstacle_guard.front_raw_mm == OBSTACLE_DISTANCE_INVALID)
+                   ? 0 : obstacle_guard.front_raw_mm;
+    min_mm = (obstacle_guard.all_raw_mm == OBSTACLE_DISTANCE_INVALID)
+                 ? 0 : obstacle_guard.all_raw_mm;
+    ranger_mm = obstacle_guard.valid[OBSTACLE_CENTER_SECTOR]
+                    ? obstacle_guard.raw_mm[OBSTACLE_CENTER_SECTOR]
+                    : front_mm;
+    obstacle_flag = obstacle_guard.obstacle;
 }
 
 static void scan_add_sample(uint16_t mm,uint8_t sec)
 {
-    if(sec>=SCAN_SECTORS || mm<20 || mm>4000) return;
-    if(scan_ok[sec]) scan_dist_mm[sec]=(uint16_t)(((uint32_t)scan_dist_mm[sec]*3u+mm)/4u);
-    else scan_dist_mm[sec]=mm;
-    scan_ok[sec]=1;
+    if(sec>=SCAN_SECTORS || mm<OBSTACLE_MIN_VALID_MM ||
+       mm>OBSTACLE_MAX_VALID_MM) return;
+    obstacle_guard_add_sample(&obstacle_guard,sec,mm);
     scan_age[sec]=0;
     scan_update_summary();
 }
@@ -179,6 +173,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	DWT_Init();
 	OLED_Init();
+	obstacle_guard_init(&obstacle_guard);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	HAL_TIM_Base_Start_IT(&htim7);          /* independent 100 Hz scan timebase */
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,scan_pulse_us[scan_sec]);
@@ -360,25 +355,62 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 /* Independent 100 Hz timebase (TIM7): servo scan + 20 Hz UART5 frame.
    It no longer depends on the MPU6050 INT, so distance/obstacle data keep
    working even if the IMU is not initialized. */
+static void C10B_SendStatus(void)
+{
+	uint8_t sector;
+	uint8_t scan_mask = 0;
+	uint8_t* sendptr = (uint8_t*)&c10b_send;
+
+	for(sector=0;sector<SCAN_SECTORS;sector++)
+	{
+		if(obstacle_guard.valid[sector]) scan_mask |= (uint8_t)(1u << sector);
+	}
+
+	c10b_send.Head1 = C10B_HEAD1;
+	c10b_send.Head2 = C10B_HEAD2;
+	c10b_send.k210_alive = k210_active_flag;
+	c10b_send.flags = (uint8_t)((obstacle_flag?0x01:0)|
+	                            (obstacle_guard.valid[OBSTACLE_CENTER_SECTOR]?0x02:0)|
+	                            (k210_active_flag?0x04:0));
+	c10b_send.k210_cx = k210.cx;
+	c10b_send.k210_size = k210.size;
+	c10b_send.distance = front_mm;
+	c10b_send.distance_min = min_mm;
+	c10b_send.temperature = (short)(temperature*100.0f);
+	c10b_send.pitch = (short)(Pitch*100.0f);
+	c10b_send.roll  = (short)(Roll*100.0f);
+	c10b_send.yaw   = (short)(Yaw*100.0f);
+	c10b_send.servo_deg = scan_angle_deg[scan_sec];
+	c10b_send.scan_mask = scan_mask;
+	c10b_send.BCCcheck = calculateBCC(sendptr,sizeof(c10b_send)-1);
+	HAL_UART_Transmit(&huart5,sendptr,sizeof(c10b_send),10);
+}
+
 static void C10B_Tick100Hz(void)
 {
 	static uint8_t c50c_send_cnt = 0;
+	static uint8_t obstacle_tx_state = 0;
 	uint8_t i;
+	uint8_t send_obstacle_event;
 
-	/* Servo sector scan: 5 sectors x 160 ms, two pings per sector. */
+	/* Age each sector, then run a centre-priority scan:
+	   0, -30, 0, +30, 0, -60, 0, +60.  Wait 90 ms for the servo to
+	   settle, test twice, then move to the next slot after 160 ms. */
 	for(i=0;i<SCAN_SECTORS;i++)
 	{
 		if(scan_age[i]<255) scan_age[i]++;
-		if(scan_age[i]>150) scan_ok[i]=0;
+		if(scan_age[i]>150) obstacle_guard_invalidate(&obstacle_guard,i);
 	}
 	scan_tick++;
-	if(scan_tick>=16)
+	if(scan_tick>=OBSTACLE_SCAN_DWELL_TICKS)
 	{
 		scan_tick=0;
-		scan_sec=(uint8_t)((scan_sec+1)%SCAN_SECTORS);
+		scan_slot=(uint8_t)((scan_slot+1u)%OBSTACLE_SCAN_SLOT_COUNT);
+		scan_sec=obstacle_scan_sector_for_slot(scan_slot);
 		__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,scan_pulse_us[scan_sec]);
 	}
-	if(scan_tick==9 || scan_tick==15)
+	if(scan_tick==OBSTACLE_SCAN_FIRST_PING_TICK ||
+	   scan_tick==OBSTACLE_SCAN_SECOND_PING_TICK)
 	{
 		echo_sec=scan_sec;
 		ranger_tri_ranging();
@@ -397,35 +429,21 @@ static void C10B_Tick100Hz(void)
 		}
 	}
 	scan_update_summary();
+	obstacle_guard_tick_10ms(&obstacle_guard,1);
+	scan_update_summary();
 
 	/* K210 alive timeout */
 	k210_active_cnt++;
 	if( k210_active_cnt>=100*1 ) k210_active_flag = 0;
 
-	/* 20 Hz frame to C50C (UART5, 115200) */
+	/* Send at 20 Hz, but transmit the obstacle rising edge immediately. */
 	c50c_send_cnt++;
-	if( c50c_send_cnt>=5 )
+	send_obstacle_event = obstacle_tx_rising_edge(obstacle_flag,obstacle_tx_state);
+	if( send_obstacle_event || c50c_send_cnt>=5 )
 	{
 		c50c_send_cnt = 0;
-		c10b_send.Head1 = C10B_HEAD1;
-		c10b_send.Head2 = C10B_HEAD2;
-		c10b_send.k210_alive = k210_active_flag;
-		c10b_send.flags = (uint8_t)((obstacle_flag?0x01:0)|(scan_ok[2]?0x02:0)|(k210_active_flag?0x04:0));
-		c10b_send.k210_cx = k210.cx;
-		c10b_send.k210_size = k210.size;
-		c10b_send.distance = front_mm;
-		c10b_send.distance_min = min_mm;
-		c10b_send.temperature = (short)(temperature*100.0f);
-		c10b_send.pitch = (short)(Pitch*100.0f);
-		c10b_send.roll  = (short)(Roll*100.0f);
-		c10b_send.yaw   = (short)(Yaw*100.0f);
-		c10b_send.servo_deg = scan_angle_deg[scan_sec];
-		c10b_send.scan_mask = (uint8_t)((scan_ok[0]?0x01:0)|(scan_ok[1]?0x02:0)|(scan_ok[2]?0x04:0)|(scan_ok[3]?0x08:0)|(scan_ok[4]?0x10:0));
-		{
-			uint8_t* sendptr = (uint8_t*)&c10b_send;
-			c10b_send.BCCcheck = calculateBCC(sendptr,sizeof(c10b_send)-1);
-			HAL_UART_Transmit(&huart5,sendptr,sizeof(c10b_send),10);
-		}
+		C10B_SendStatus();
+		obstacle_tx_state = obstacle_flag;
 	}
 }
 

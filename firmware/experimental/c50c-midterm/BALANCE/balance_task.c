@@ -13,6 +13,9 @@ static ROBOT_PARKING_t park;
 //增量式PI控制器
 PI_CONTROLLER PI_MotorA,PI_MotorB,PI_MotorC,PI_MotorD,PI_Servo;
 
+/* Emergency stop bypasses the normal velocity ramp. */
+static volatile uint8_t mid_emergency_stop_request = 0;
+
 
 uint16_t K210_MoveX = 300;
 uint16_t K210_Kp = 8;
@@ -1014,6 +1017,12 @@ Author: WHEELTEC
 **************************************************************************/
 static void ResponseControl(void)
 {
+	if(mid_emergency_stop_request)
+	{
+		Set_Pwm(0,0,0,0,1500);
+		return;
+	}
+
 	#if defined AKM_CAR
 	//PI控制
 	robot.MOTOR_A.Output = Incremental_MOTOR( &PI_MotorA , robot.MOTOR_A.Encoder , robot.MOTOR_A.Target );
@@ -2774,6 +2783,7 @@ float Midterm_Obstacle_m(void)
 void Start_Midterm(void)
 {
 	memset(&mid,0,sizeof(mid));
+	mid_emergency_stop_request = 0;
 	mid.active = (u8)MIDTERM_ENABLE;
 	mid.state = MID_STATE_IDLE;
 	mid.gyro_sign = 1.0f;
@@ -2793,6 +2803,37 @@ static void Midterm_Stop(void)
 	robot_control.Vy = 0.0f;
 	robot_control.Vz = 0.0f;
 	Drive_Motor(0.0f,0.0f,0.0f);
+}
+
+static void Midterm_EmergencyStop(void)
+{
+	if(!mid_emergency_stop_request)
+	{
+		PI_Controller_Reset(&PI_MotorA);
+		PI_Controller_Reset(&PI_MotorB);
+		PI_Controller_Reset(&PI_MotorC);
+		PI_Controller_Reset(&PI_MotorD);
+	}
+	mid_emergency_stop_request = 1;
+	robot_control.Vx = 0.0f;
+	robot_control.Vy = 0.0f;
+	robot_control.Vz = 0.0f;
+	robot_control.smooth_Vx = 0.0f;
+	robot_control.smooth_Vy = 0.0f;
+	robot_control.smooth_Vz = 0.0f;
+	robot.MOTOR_A.Target = 0.0f;
+	robot.MOTOR_B.Target = 0.0f;
+	robot.MOTOR_C.Target = 0.0f;
+	robot.MOTOR_D.Target = 0.0f;
+	robot.MOTOR_A.Output = 0;
+	robot.MOTOR_B.Output = 0;
+	robot.MOTOR_C.Output = 0;
+	robot.MOTOR_D.Output = 0;
+}
+
+static void Midterm_ReleaseEmergencyStop(void)
+{
+	mid_emergency_stop_request = 0;
 }
 
 void Midterm_Control(void)
@@ -2855,7 +2896,7 @@ void Midterm_Control(void)
 
 	if(mid.state == MID_STATE_PAUSE)
 	{
-		Midterm_Stop();
+		Midterm_EmergencyStop();
 		if(!c10b_ok)
 		{
 			mid.clear_cnt = 0;
@@ -2953,7 +2994,7 @@ void Midterm_Control(void)
 
 	if(!c10b_ok)
 	{
-		Midterm_Stop();          /* C10B link lost: fail safe */
+		Midterm_EmergencyStop();          /* C10B link lost: fail safe */
 		return;
 	}
 
@@ -2962,9 +3003,11 @@ void Midterm_Control(void)
 		mid.resume_state = mid.state;
 		mid.state = MID_STATE_PAUSE;
 		mid.clear_cnt = 0;
-		Midterm_Stop();
+		Midterm_EmergencyStop();
 		return;
 	}
+
+	Midterm_ReleaseEmergencyStop();
 
 	if(mid.phase_dist >= (MID_TARGET_DIST - MID_DIST_TOL))
 	{
