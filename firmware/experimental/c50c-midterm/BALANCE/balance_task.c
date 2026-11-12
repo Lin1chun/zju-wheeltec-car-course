@@ -2357,7 +2357,7 @@ void ROBOT_CONTROL_t_Init(ROBOT_CONTROL_t* p)
 	p->FlagStop = 0;
 	
 	//纠偏系数
-	p->LineDiffParam = 52;
+	p->LineDiffParam = 53;
 }
 
 //自检变量初始化
@@ -2714,8 +2714,10 @@ static uint8_t Deep_SelfCheck( u16 RATE )
 #define MID_SPEED             0.20f
 #define MID_TARGET_DIST       3.00f
 #define MID_DIST_TOL          0.02f
-#define MID_STOP_MM           500
-#define MID_CLEAR_MM          550
+#define MID_STOP_MM           600
+#define MID_CLEAR_MM          650
+#define MID_READY_FRAMES      10      /* 10 new frames (0.5 s) before motion */
+#define MID_ODOM_DEADBAND_M   0.00005f
 #define MID_CLEAR_TICKS       40      /* 0.4 s clear before resuming */
 #define MID_TURN_TOL_DEG      1.0f
 #define MID_TURN_MAX          0.50f   /* rad/s */
@@ -2745,6 +2747,8 @@ typedef struct
 	u32 run_ms;
 	u32 turn_ms;
 	u16 clear_cnt;
+	u16 ready_frames;
+	u32 last_frame_ok;
 } MIDTERM_t;
 
 static MIDTERM_t mid;
@@ -2766,8 +2770,10 @@ float Midterm_AvgSpeed(void)
 
 float Midterm_Obstacle_m(void)
 {
-	/* Read the latest frame directly so the display also works while the
-	   3 m mission is disabled (MIDTERM_ENABLE = 0). */
+	/* Do not expose the no-echo placeholder as a valid measurement before
+	   the first forward scan has completed. */
+	if(!c10b_active_flag || !(c10b_recv.scan_mask & 0x0E))
+		return 0.0f;
 	return (float)c10b_recv.distance * 0.001f;
 }
 
@@ -2797,9 +2803,10 @@ static void Midterm_Stop(void)
 
 void Midterm_Control(void)
 {
-	float vz, vy, err;
+	float vz, vy, err, step;
 	u8 c10b_ok;
 	u8 blocked;
+	u8 front_valid;
 
 
 	/* Wheel-odometry yaw: sign is fixed by the mecanum kinematics, so it
@@ -2814,15 +2821,16 @@ void Midterm_Control(void)
 		if(c10b_active_cnt > 50) c10b_active_flag = 0;
 	}
 
-	mid.obstacle_m = (float)c10b_recv.distance * 0.001f;
 	c10b_ok = (c10b_active_flag != 0) ? 1 : 0;
+	front_valid = (u8)(c10b_ok && (c10b_recv.scan_mask & 0x0E));
+	mid.obstacle_m = front_valid ? (float)c10b_recv.distance * 0.001f : 0.0f;
 	if(!mid.active)
 	{
 		Drive_Motor(0.0f,0.0f,0.0f);
 		return;
 	}
 	blocked = 0;
-	if(c10b_ok && (((c10b_recv.flags & 0x01) != 0) || c10b_recv.distance < MID_STOP_MM))
+	if(front_valid && (((c10b_recv.flags & 0x01) != 0) || c10b_recv.distance < MID_STOP_MM))
 	{
 		blocked = 1;
 	}
@@ -2830,15 +2838,28 @@ void Midterm_Control(void)
 	if(mid.state == MID_STATE_IDLE)
 	{
 		Midterm_Stop();
-		if(c10b_ok && (c10b_recv.scan_mask & 0x0E))   /* front sector has a valid echo */
+		if(front_valid && !blocked)
 		{
-			mid.state = MID_STATE_OUT;
-			mid.target_yaw = mid.yaw_deg;
-			mid.phase_dist = 0.0f;
-			mid.phase_lat = 0.0f;
-			mid.total_path = 0.0f;
-			mid.run_ms = 0;
-			mid.avg_speed = 0.0f;
+			if(c10b_frame_ok != mid.last_frame_ok)
+			{
+				mid.last_frame_ok = c10b_frame_ok;
+				if(mid.ready_frames < MID_READY_FRAMES) mid.ready_frames++;
+			}
+			if(mid.ready_frames >= MID_READY_FRAMES)
+			{
+				mid.state = MID_STATE_OUT;
+				mid.target_yaw = mid.yaw_deg;
+				mid.phase_dist = 0.0f;
+				mid.phase_lat = 0.0f;
+				mid.total_path = 0.0f;
+				mid.run_ms = 0;
+				mid.avg_speed = 0.0f;
+			}
+		}
+		else
+		{
+			mid.ready_frames = 0;
+			mid.last_frame_ok = c10b_frame_ok;
 		}
 		return;
 	}
@@ -2850,7 +2871,11 @@ void Midterm_Control(void)
 	}
 
 	mid.run_ms += 10;
-	mid.total_path += sqrtf(mid_dx*mid_dx + mid_dy*mid_dy);
+	if(mid.state == MID_STATE_OUT || mid.state == MID_STATE_BACK)
+	{
+		step = sqrtf(mid_dx*mid_dx + mid_dy*mid_dy);
+		if(step >= MID_ODOM_DEADBAND_M) mid.total_path += step;
+	}
 	if(mid.run_ms > 0) mid.avg_speed = mid.total_path / ((float)mid.run_ms * 0.001f);
 
 	if(mid.state == MID_STATE_PAUSE)
@@ -2861,7 +2886,7 @@ void Midterm_Control(void)
 			mid.clear_cnt = 0;
 			return;
 		}
-		if(!blocked && c10b_recv.distance > MID_CLEAR_MM)
+		if(front_valid && !blocked && c10b_recv.distance > MID_CLEAR_MM)
 		{
 			if(mid.clear_cnt < 0xFFFF) mid.clear_cnt++;
 			if(mid.clear_cnt >= MID_CLEAR_TICKS)
